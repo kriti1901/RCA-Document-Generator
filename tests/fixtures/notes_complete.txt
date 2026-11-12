@@ -1,0 +1,22 @@
+#inc-4821-payments  (channel export, 3 Nov 2026, all times IST)
+
+[14:06] priya.n: seeing a wall of 500s on payments-api, checkout is failing for a lot of people
+[14:07] priya.n: looking at the graphs it started ~14:05
+[14:12] pagerduty: ALERT payments-api 5xx rate > 20% (prod) -- acked by ravi.kumar
+[14:13] ravi.kumar: I'll take IC. calling it sev2 for now. INC-4821
+[14:15] ravi.kumar: checkout-web is throwing too since it calls payments
+[14:18] meera.i: db connections are maxed out on payments-db, the pool is saturated
+[14:22] meera.i: deploy 2291 went out at 14:03, it included a config change for the connection pool
+[14:25] ravi.kumar: ok rolling back 2291
+[14:40] ravi.kumar: rollback done, error rate dropping
+[14:41] priya.n: checkout success rate recovering
+[15:10] ravi.kumar: all green for 30 min, closing. resolved 15:10
+[15:20] meera.i: root cause: the config change in deploy 2291 set the db pool max to 5 instead of 50 (typo). CI doesn't validate config values so it sailed through
+[15:22] meera.i: impact - roughly 30% of checkout attempts failed between 14:05 and 14:40, about 4,200 failed orders. no data loss, the failed orders were never written
+[15:25] ravi.kumar: no SLA breach, we're inside the monthly error budget. support got 37 tickets
+[15:30] ravi.kumar: went well: alert fired fast and the rollback was clean
+[15:31] ravi.kumar: went badly: took us 10 min to connect the deploy to the errors, the deploy channel is too noisy
+[15:35] meera.i: actions:
+  - add schema validation for pool settings in config CI -- meera, by 20 Nov
+  - alert on db connection saturation > 80% -- priya, by 27 Nov
+  - link deploy events into the incident channel automatically -- no owner yet

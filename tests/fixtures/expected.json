@@ -1,0 +1,201 @@
+{
+  "_comment": "Scoring key for scripts/bakeoff.py. 'expected': a field counts as found if its extracted value contains any of the listed fragments (case-insensitive). 'absent': fields the notes do not state; extracting one is counted as an unsupported fact.",
+  "notes_complete.txt": {
+    "expected": {
+      "incident_id": [
+        "INC-4821"
+      ],
+      "severity": [
+        "Sev2"
+      ],
+      "incident_commander": [
+        "ravi"
+      ],
+      "affected_services": [
+        "payments-api",
+        "checkout-web"
+      ],
+      "customer_impact": [
+        "checkout"
+      ],
+      "impact_scale": [
+        "30%",
+        "4,200",
+        "4200"
+      ],
+      "business_impact": [
+        "SLA",
+        "37",
+        "error budget"
+      ],
+      "data_loss": [
+        "no data loss",
+        "none",
+        "no "
+      ],
+      "started_at": [
+        "14:05"
+      ],
+      "detected_at": [
+        "14:12"
+      ],
+      "mitigated_at": [
+        "14:40"
+      ],
+      "resolved_at": [
+        "15:10"
+      ],
+      "timezone": [
+        "IST"
+      ],
+      "detection_method": [
+        "pagerduty",
+        "alert",
+        "5xx"
+      ],
+      "mitigation_steps": [
+        "roll"
+      ],
+      "fix_applied": [
+        "roll",
+        "2291",
+        "revert"
+      ],
+      "trigger": [
+        "2291",
+        "deploy",
+        "config"
+      ],
+      "root_cause": [
+        "5 instead of 50",
+        "pool",
+        "typo"
+      ],
+      "went_well": [
+        "alert",
+        "rollback"
+      ],
+      "went_wrong": [
+        "10 min",
+        "noisy",
+        "deploy"
+      ],
+      "incident_date": [
+        "2026-11-03",
+        "3 Nov"
+      ]
+    },
+    "absent": [
+      "got_lucky",
+      "five_whys"
+    ],
+    "actions": 3,
+    "events_min": 6
+  },
+  "notes_partial.txt": {
+    "expected": {
+      "affected_services": [
+        "search"
+      ],
+      "customer_impact": [
+        "search"
+      ],
+      "started_at": [
+        "09:40",
+        "9:40"
+      ],
+      "detected_at": [
+        "10:05"
+      ],
+      "mitigated_at": [
+        "10:20"
+      ],
+      "resolved_at": [
+        "10:50"
+      ],
+      "timezone": [
+        "UTC"
+      ],
+      "detection_method": [
+        "customer",
+        "support",
+        "ticket"
+      ],
+      "mitigation_steps": [
+        "revert",
+        "batch"
+      ],
+      "fix_applied": [
+        "revert",
+        "batch",
+        "reindex"
+      ],
+      "trigger": [
+        "release",
+        "batch size"
+      ],
+      "root_cause": [
+        "batch size",
+        "OOM",
+        "memory",
+        "alias",
+        "empty index"
+      ],
+      "monitoring_gaps": [
+        "no alert",
+        "nobody got paged",
+        "alert"
+      ],
+      "incident_date": [
+        "5 Nov"
+      ]
+    },
+    "absent": [
+      "incident_id",
+      "severity",
+      "incident_commander",
+      "business_impact",
+      "data_loss",
+      "went_well",
+      "five_whys",
+      "got_lucky"
+    ],
+    "actions": 2,
+    "events_min": 3
+  },
+  "notes_sparse.txt": {
+    "expected": {
+      "customer_impact": [
+        "login"
+      ],
+      "fix_applied": [
+        "restart"
+      ],
+      "started_at": [
+        "8"
+      ]
+    },
+    "absent": [
+      "incident_id",
+      "severity",
+      "incident_commander",
+      "impact_scale",
+      "business_impact",
+      "data_loss",
+      "detected_at",
+      "mitigated_at",
+      "resolved_at",
+      "timezone",
+      "detection_method",
+      "monitoring_gaps",
+      "five_whys",
+      "went_well",
+      "went_wrong",
+      "got_lucky",
+      "contributing_factors",
+      "incident_date"
+    ],
+    "actions": 0,
+    "events_min": 0
+  }
+}

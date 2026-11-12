@@ -1,0 +1,19 @@
+Incident: Payments API outage
+Services: payments-api, checkout-web
+Start: 2026-11-03 14:05
+Detected: 14:12
+Mitigated: 14:40
+Resolved: 15:10
+Impact: Checkout failed with HTTP 500 for about 30% of users
+Detected by: PagerDuty alert on payments-api 5xx rate
+Mitigation: Rolled back deploy 2291; Restarted payment workers
+Fix: Reverted the config change that set the DB pool size to 5
+Trigger: Config push at 14:03 lowered the DB connection pool size
+Root cause: bad config push
+14:03 config change deployed to payments-api
+14:05 5xx rate on payments-api climbs above 20%
+14:12 PagerDuty alert fires, on-call acknowledges
+14:40 rollback of deploy 2291 completed
+15:10 error rate back to normal, incident closed
+Action: Add validation for pool size in config CI
+Action: Add alert on DB connection saturation (owner: Meera, due: 2026-11-20)

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RCA: {{ title }}</title>
+<style>
+@page {
+  size: A4;
+  margin: 20mm 16mm 19mm 16mm;
+  @bottom-left { content: "RCA  \00B7  " string(footer-text); font-size: 7.5pt; color: #667085; }
+  @bottom-center { content: "Confidential, internal use"; font-size: 7.5pt; color: #667085; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 7.5pt; color: #667085; }
+{% if not final %}
+  @top-right { content: "DRAFT"; font-size: 8.5pt; font-weight: 700; letter-spacing: 0.14em; color: #b54708; }
+{% endif %}
+}
+html {
+  font-family: "Inter", "Noto Sans", "Liberation Sans", "DejaVu Sans", Arial, sans-serif;
+  font-size: 9.6pt; line-height: 1.5; color: #101828;
+}
+body { margin: 0; }
+p { margin: 0 0 6pt 0; }
+a { color: #1d4ed8; text-decoration: none; }
+
+.kicker { font-size: 8pt; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #475467; margin-bottom: 4pt; }
+/* carries the short reference shown in the page footer; takes no space on the page */
+.footer-text { string-set: footer-text content(); position: absolute; width: 0; height: 0; overflow: hidden; }
+h1 { font-size: 20pt; line-height: 1.2; margin: 0 0 8pt 0; }
+.badges { margin-bottom: 12pt; }
+.badge { display: inline-block; padding: 2pt 8pt; border-radius: 10pt; font-size: 8.5pt; font-weight: 700; margin-right: 5pt; }
+.sev-Sev1 { background: #fee4e2; color: #b42318; }
+.sev-Sev2 { background: #ffead5; color: #b54708; }
+.sev-Sev3 { background: #fef7c3; color: #854a0e; }
+.sev-Sev4 { background: #eaecf0; color: #344054; }
+.badge-state { background: #eaecf0; color: #344054; }
+.badge-final { background: #d1fadf; color: #05603a; }
+
+h2 { font-size: 12.5pt; margin: 16pt 0 6pt 0; padding-bottom: 3pt; border-bottom: 1.2pt solid #101828; break-after: avoid; }
+h2 .num { color: #667085; font-weight: 400; margin-right: 5pt; }
+h3 { font-size: 10pt; margin: 9pt 0 3pt 0; break-after: avoid; }
+
+table { width: 100%; border-collapse: collapse; margin: 4pt 0 8pt 0; }
+th, td { text-align: left; vertical-align: top; padding: 4pt 6pt; border-bottom: 0.5pt solid #d0d5dd; }
+tr { break-inside: avoid; }
+thead th { background: #f2f4f7; font-size: 8.4pt; font-weight: 700; border-bottom: 0.8pt solid #98a2b3; }
+table.facts th { width: 31%; font-weight: 600; color: #344054; background: #f9fafb; }
+table.grid td, table.grid th { font-size: 8.8pt; }
+td.num, th.num { width: 5%; color: #667085; }
+td.nowrap { white-space: nowrap; }
+
+ul.tight, ol.tight { margin: 0; padding-left: 13pt; }
+ul.tight li, ol.tight li { margin: 0 0 1.5pt 0; }
+ul.list, ol.list { margin: 2pt 0 8pt 0; padding-left: 15pt; }
+
+.declined { font-style: italic; color: #8a5a00; background: #fff6e5; padding: 0.5pt 3pt; border-radius: 2pt; }
+.muted { color: #667085; }
+.caption { font-size: 8.4pt; color: #475467; margin: -3pt 0 8pt 0; }
+.durations { margin: 0 0 8pt 0; }
+.durations span { display: inline-block; margin-right: 14pt; }
+.durations b { font-weight: 700; }
+.quote { font-size: 8.4pt; color: #344054; }
+.note { font-size: 8.4pt; color: #475467; border-left: 2pt solid #d0d5dd; padding-left: 7pt; margin-top: 6pt; }
+</style>
+</head>
+<body>
+
+{% macro value(cell) -%}
+  {%- if cell.kind == 'list' and cell.state == 'ok' -%}
+    {% if cell.ordered %}<ol class="tight">{% for item in cell['items'] %}<li>{{ item }}</li>{% endfor %}</ol>
+    {%- else %}<ul class="tight">{% for item in cell['items'] %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+  {%- elif cell.state == 'declined' -%}
+    <span class="declined">{{ cell.text }}</span>
+  {%- elif cell.state in ('missing', 'na') -%}
+    <span class="muted">{{ cell.text }}</span>
+  {%- else -%}
+    {{ cell.text }}
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro facts_table(rows) %}
+  {% if rows %}
+  <table class="facts"><tbody>
+    {% for row in rows %}<tr><th>{{ row.label }}</th><td>{{ value(row) }}</td></tr>
+    {% endfor %}
+  </tbody></table>
+  {% endif %}
+{% endmacro %}
+
+{% macro narrative(paragraphs) %}
+  {% for paragraph in paragraphs %}<p>{{ paragraph }}</p>
+  {% endfor %}
+{% endmacro %}
+
+<span class="footer-text">{{ footer_text }}</span>
+<div class="kicker">Root Cause Analysis{% if incident_ref %} &middot; {{ incident_ref }}{% endif %}</div>
+<h1>{{ title }}</h1>
+<div class="badges">
+  {% if severity %}<span class="badge sev-{{ severity }}">{{ severity }}</span>{% endif %}
+  <span class="badge {{ 'badge-final' if final else 'badge-state' }}">{{ 'Final' if final else 'Draft' }} &middot; version {{ version }}</span>
+</div>
+
+<h2><span class="num">1</span>Incident overview</h2>
+{{ facts_table(header_rows) }}
+
+<h2><span class="num">2</span>Executive summary</h2>
+{% if summary %}{{ narrative(summary) }}{% else %}<p class="muted">The facts available were not enough to write a summary.</p>{% endif %}
+
+<h2><span class="num">3</span>Impact</h2>
+{{ narrative(impact.paragraphs) }}
+{{ facts_table(impact.rows) }}
+
+<h2><span class="num">4</span>Timeline</h2>
+<table class="grid">
+  <thead><tr><th>Milestone</th><th>Time as recorded</th>{% if timeline.show_utc %}<th>Time (UTC)</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for row in timeline.rows %}
+    <tr>
+      <td>{{ row.label }}</td>
+      <td>{% if row.state == 'declined' %}<span class="declined">{{ row.local }}</span>{% elif row.state == 'missing' %}<span class="muted">{{ row.local }}</span>{% else %}{{ row.local }}{% endif %}</td>
+      {% if timeline.show_utc %}<td>{{ row.utc or '—' }}</td>{% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="caption">{% if timeline.tz_state == 'declined' %}<span class="declined">{{ timeline.caption }}</span>{% else %}{{ timeline.caption }}{% endif %}</p>
+{% if timeline.durations %}
+<p class="durations">{% for item in timeline.durations %}<span>{{ item.label }}: <b>{{ item.text }}</b></span>{% endfor %}</p>
+{% endif %}
+{% if timeline.events %}
+<h3>Detailed timeline</h3>
+<table class="grid">
+  <thead><tr><th>Time</th>{% if timeline.show_utc %}<th>UTC</th>{% endif %}<th>Event</th><th>Source</th></tr></thead>
+  <tbody>
+  {% for event in timeline.events %}
+    <tr><td class="nowrap">{{ event.time }}</td>{% if timeline.show_utc %}<td class="nowrap">{{ event.utc or '—' }}</td>{% endif %}<td>{{ event.event }}</td><td>{{ event.source or '—' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<h2><span class="num">5</span>Detection</h2>
+{{ narrative(detection.paragraphs) }}
+{{ facts_table(detection.rows) }}
+
+<h2><span class="num">6</span>Response and resolution</h2>
+{{ narrative(response.paragraphs) }}
+{{ facts_table(response.rows) }}
+
+<h2><span class="num">7</span>Root cause analysis</h2>
+{{ narrative(root_cause.paragraphs) }}
+{{ facts_table(root_cause.rows) }}
+
+<h2><span class="num">8</span>Lessons learned</h2>
+{% if lessons %}
+  {% for row in lessons %}
+    <h3>{{ row.label }}</h3>
+    {% if row.state == 'ok' %}<ul class="list">{% for item in row['items'] %}<li>{{ item }}</li>{% endfor %}</ul>
+    {% elif row.state == 'declined' %}<p><span class="declined">{{ row.text }}</span></p>
+    {% else %}<p class="muted">{{ row.text }}</p>{% endif %}
+  {% endfor %}
+{% else %}
+  <p class="muted">No lessons were recorded for this incident.</p>
+{% endif %}
+
+<h2><span class="num">9</span>Corrective and preventive actions</h2>
+{% if actions.rows %}
+<table class="grid">
+  <thead><tr><th class="num">#</th><th>Action</th><th>Type</th><th>Owner</th><th>Due date</th><th>Ticket</th></tr></thead>
+  <tbody>
+  {% for row in actions.rows %}
+    <tr>
+      <td class="num">{{ row.number }}</td><td>{{ row.action }}</td><td>{{ row.type }}</td>
+      <td>{% if row.owner.state == 'declined' %}<span class="declined">{{ row.owner.text }}</span>{% elif row.owner.state == 'missing' %}<span class="muted">{{ row.owner.text }}</span>{% else %}{{ row.owner.text }}{% endif %}</td>
+      <td class="nowrap">{{ row.due }}</td><td>{{ row.ticket }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% elif actions.state == 'declined' %}
+  <p><span class="declined">{{ actions.text }}</span></p>
+{% else %}
+  <p class="muted">{{ actions.text }}</p>
+{% endif %}
+
+<h2><span class="num">10</span>Related documents</h2>
+{% if related %}
+<ul class="list">
+  {% for item in related %}
+  <li>{% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}{% if item.incident_id %} ({{ item.incident_id }}{% if item.severity %}, {{ item.severity }}{% endif %}){% endif %}{% if item.root_cause %}. Root cause: {{ item.root_cause }}{% endif %}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">No similar past incidents were found in this tool's records.</p>
+{% endif %}
+
+<h2><span class="num">11</span>Information gaps</h2>
+{% if gaps %}
+<p>The details below were asked for while preparing this document and were not provided.</p>
+<table class="grid">
+  <thead><tr><th style="width:27%">Detail</th><th style="width:17%">Section</th><th style="width:27%">Status</th><th style="width:16%">Asked of</th><th style="width:13%">Date</th></tr></thead>
+  <tbody>
+  {% for gap in gaps %}
+    <tr><td>{{ gap.label }}</td><td>{{ gap.section }}</td><td><span class="declined">{{ not_provided }}</span>{% if gap.note %} <span class="muted">({{ gap.note }})</span>{% endif %}</td><td>{{ gap.by }}</td><td class="nowrap">{{ gap.date }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>None. Every detail the RCA layout requires was provided.</p>
+{% endif %}
+
+<h2><span class="num">12</span>Appendix and revision history</h2>
+<h3>Revision history</h3>
+<table class="grid">
+  <thead><tr><th>Version</th><th>Date</th><th>Prepared by</th><th>Status</th></tr></thead>
+  <tbody><tr><td>{{ revision.version }}</td><td>{{ revision.date }}</td><td>{{ revision.author }}</td><td>{{ revision.status }}</td></tr></tbody>
+</table>
+<p class="note">How this document was produced: the RCA Assistant extracted the facts from notes supplied by {{ author or 'the author' }}, checked each one against a quote from those notes, asked for missing details, and drafted the narrative sections{% if model_description %} using {{ model_description }}{% endif %}. Layout, durations and the gaps table are generated by code. {{ 'It was approved by ' ~ approver ~ '.' if final and approver else 'It has not been approved yet.' if not final else '' }} Generated {{ generated_at }}.</p>
+{% if evidence %}
+<h3>Source of each fact</h3>
+<table class="grid">
+  <thead><tr><th>Field</th><th>Value</th><th>Supporting quote</th><th>Source</th></tr></thead>
+  <tbody>
+  {% for row in evidence %}
+    <tr><td>{{ row.label }}</td><td>{{ row.value }}</td><td class="quote">&ldquo;{{ row.quote }}&rdquo;</td><td>{{ row.source }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+</body>
+</html>

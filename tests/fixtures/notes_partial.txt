@@ -1,0 +1,12 @@
+search outage notes (rough)
+
+- thurs 5 nov, ~09:40 UTC customers started reporting search returning nothing on the storefront
+- nobody got paged. support escalated to us at 10:05 after ~15 tickets
+- arjun found the search-indexer had been crashlooping since the 09:30 release, OOMKilled
+- the release bumped the indexer batch size from 500 to 5000 docs, memory limit stayed at 2Gi
+- index went stale, then the alias flipped to an empty index when the nightly rebuild job ran early
+- 10:20 arjun reverted the batch size, pods stable
+- 10:50 reindex finished, search back to normal
+- we had no alert on indexer restarts or on index doc count
+- todo: add alert on indexer crashloop (arjun)
+- todo: block the alias flip if the new index doc count is < 90% of the old one

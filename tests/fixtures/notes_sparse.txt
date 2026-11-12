@@ -1,0 +1,1 @@
+login was broken for a bit this morning, around 8. fixed by restarting the auth pods. dave thinks it was the cert rotation
