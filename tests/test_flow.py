@@ -48,8 +48,10 @@ def test_notes_to_approved_pdf(service, demo_notes):
     for heading in ("Incident overview", "Executive summary", "Impact", "Timeline", "Detection",
                     "Response and resolution", "Root cause analysis", "Lessons learned",
                     "Corrective and preventive actions", "Related documents", "Information gaps",
-                    "Appendix and revision history"):
+                    "Revision history"):
         assert heading in text
+    assert "Source of each fact" not in text and "Supporting quote" not in text and "Appendix" not in text, \
+        "the document ends with the revision history; the quotes behind each fact are not printed"
 
 
 def test_the_person_who_answers_is_the_one_recorded(service, demo_notes):

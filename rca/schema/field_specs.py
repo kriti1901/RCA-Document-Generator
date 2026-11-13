@@ -23,7 +23,7 @@ SECTIONS: tuple[tuple[str, str], ...] = (
     ("actions", "Corrective and preventive actions"),
     ("related", "Related documents"),
     ("gaps", "Information gaps"),
-    ("appendix", "Appendix and revision history"),
+    ("revision_history", "Revision history"),
 )
 SECTION_TITLES = dict(SECTIONS) | {"header": "Incident overview"}
 

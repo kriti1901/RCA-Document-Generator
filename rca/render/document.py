@@ -141,20 +141,6 @@ def _actions(facts: IncidentFacts) -> dict:
     return {"state": "missing", "rows": [], "text": "No follow-up actions were recorded."}
 
 
-def _evidence(facts: IncidentFacts) -> list[dict]:
-    rows = []
-    for fid, fv in facts.scalars.items():
-        if fv.provided and fv.status in ("from_notes", "from_user") and fv.evidence:
-            rows.append({"label": BY_ID[fid].label, "value": fv.value, "quote": fv.evidence,
-                         "source": "Notes" if fv.status == "from_notes" else f"Answer from {fv.by or 'the user'}"})
-    for fid, lv in facts.lists.items():
-        for item in lv.items if lv.provided else []:
-            if item.evidence:
-                rows.append({"label": BY_ID[fid].label, "value": item.value, "quote": item.evidence,
-                             "source": "Notes" if item.status == "from_notes" else f"Answer from {item.by or 'the user'}"})
-    return rows
-
-
 def build_view(state: dict, *, now: datetime, final: bool, model_description: str = "") -> dict[str, Any]:
     facts = IncidentFacts.load(state.get("facts"))
     user = state.get("user") or {}
@@ -215,7 +201,6 @@ def build_view(state: dict, *, now: datetime, final: bool, model_description: st
         "actions": _actions(facts),
         "related": related,
         "gaps": gaps,
-        "evidence": _evidence(facts),
         "revision": {"version": version, "date": now.strftime("%d %b %Y").lstrip("0"),
                      "author": user.get("name", ""),
                      "status": f"Approved by {approver}" if final else "Draft, awaiting approval"},
